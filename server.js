@@ -21,17 +21,13 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.NODE_ENV === 'production' 
-      ? ["https://your-frontend-domain.vercel.app"] // Update after deploying frontend
-      : "http://localhost:5173",
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     methods: ["GET", "POST"]
   }
 });
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? ["https://your-frontend-domain.vercel.app"] // Update after deploying frontend
-    : "http://localhost:5173"
+  origin: process.env.FRONTEND_URL || "http://localhost:5173"
 }));
 
 
