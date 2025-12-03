@@ -5,7 +5,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const socketAuthMiddleware = require('./middleware/socketAuth'); // ADD THIS
+const socketAuthMiddleware = require('./middleware/socketAuth');
 
 const {
   handleJoinRoom,
@@ -19,19 +19,25 @@ const {
 const app = express();
 const server = http.createServer(app);
 
+// UPDATED CORS CONFIGURATION
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://codecanvas-eight.vercel.app' // YOUR VERCEL URL
+];
+
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
-    methods: ["GET", "POST"]
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173"
+  origin: allowedOrigins,
+  credentials: true
 }));
 
-
-app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB
@@ -52,14 +58,13 @@ app.get('/', (req, res) => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/rooms', require('./routes/rooms'));
 
-// ADD SOCKET AUTHENTICATION MIDDLEWARE
+// Socket authentication middleware
 io.use(socketAuthMiddleware);
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
   console.log('✅ User connected:', socket.id);
   
-  // Log auth status
   if (socket.user) {
     console.log(`   Authenticated as: ${socket.user.username}`);
   } else {
